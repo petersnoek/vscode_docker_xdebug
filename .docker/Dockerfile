@@ -1,4 +1,4 @@
-FROM php:7.2-apache
+FROM php:7.4-apache
 RUN pecl install -f xdebug \
 && echo "zend_extension=$(find /usr/local/lib/php/extensions/ -name xdebug.so)" > /usr/local/etc/php/conf.d/xdebug.ini \
 && echo "xdebug.mode = debug" >> /usr/local/etc/php/conf.d/xdebug.ini \

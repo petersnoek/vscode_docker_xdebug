@@ -1,14 +1,52 @@
 version: '3'
 services:
-  hello-world-demo:
+  php_apache:
     build:
       context: .
-      dockerfile: ./Dockerfile
-    image: hello-world-demo
-    container_name: hello-world-demo
+      dockerfile: ./.docker/Dockerfile
     environment:
-      XDEBUG_CONFIG: remote_host=host.docker.internal remote_port=9000 remote_enable=1
+      XDEBUG_CONFIG: remote_host=host.docker.internal remote_enable=1
     ports:
       - '80:80'
     volumes:
-        - './src:/var/www/html'
+      - '.:/var/www/html'
+    networks:
+      - internal
+  mysql:
+        image: 'mysql:8.0'
+        ports:
+            - '${FORWARD_DB_PORT:-3306}:3306'
+        environment:
+            MYSQL_ROOT_PASSWORD: ''
+            MYSQL_DATABASE: 'laravel'
+            MYSQL_USER: 'root'
+            MYSQL_PASSWORD: ''
+            MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+        volumes:
+            - 'mysql:/var/lib/mysql'
+        networks:
+            - internal
+  phpmyadmin.mac:
+        image: phpmyadmin/phpmyadmin:5.0.2
+        # container_name: phpmyadmin-5.0.2-8083
+        links:
+            - mysql
+        environment:
+            PMA_HOST: mysql
+            PMA_PORT: 3306
+        ports:
+        - '8083:80'
+        volumes:
+        - 'phpmyadmin:/sessions'
+        depends_on:
+          - mysql
+        networks:
+          - internal
+networks:
+    internal:
+        driver: bridge
+volumes:
+    mysql:
+        driver: local
+    phpmyadmin:
+        driver: local
